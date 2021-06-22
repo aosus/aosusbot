@@ -1,27 +1,30 @@
 # aosusbot
 
-aosusbot is bot send last news from [aosus.org](https://aosus.org/)
+aosusbot is to bot send latest news from [aosus.org](https://aosus.org/), using RSS
 
 ## requirements
-**>= python3.7**
+* **>= python3.7**
+
+* pip
+
+python dependencies listed in [requirements.txt](requirements.txt)
 
 ## installation
 
-**first** clone the bot from repository
+clone the bot from repository
+
 ```bash
 git clone https://github.com/aosus/aosusbot
-# join to directory
-cd aosusbot
 ```
 
 and install packages from [pypi](https://pypi.org/) use pip
 ```bash
 pip install -r requirements.txt
 ```
-**second**
+
 * put the bot token in the config file
 
-* run make_db file to make database
+* run make_db file to initiate the database
 
 The last thing is to run the bot
 ```bash
