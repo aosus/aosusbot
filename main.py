@@ -119,7 +119,7 @@ def get_is_admin(chat_id:int, user_id:int):
     if chat_id == user_id: # if is chat_id == user_id that mean is private
         return False
     else:
-        return user_id in map(lambda user: user.user.id, bot.get_chat_administrators(chat_id))
+        return user_id in map(lambda user: user.user.id, bot.get_chat_administrators(chat_id)) # map make list of admins id
 
 def convert_status(chat_id:int, msg_id:int, new_status:str):
     """ convert the status of chat
@@ -164,7 +164,7 @@ def get_text(feed):
     author = feed['author']
     tag = feed['tags'][0]['term']
     summary = cleanhtml( feed['summary'])
-    summary = summary[:summary.find(' ', 55)]+'...'
+    summary = summary[:summary.find(' ', 55)]+'...' # get full last word
     link = feed['link']
     text = f"موضوع جديد على مجتمع اسس من {author} \n\n <b><a href='{link}'>{title}</a></b> \n\n <code>{summary}</code> \n\nالقسم:{tag}"
     return text
@@ -179,7 +179,7 @@ def send_to_users(feed):
     for chat_id in get_column('chats', 'id'):
         try:
             bot.send_message(chat_id, text, parse_mode="HTML")
-        except Exception:
+        except Exception: # handle when someone kicked bot
             pass
 
 def main_loop():
@@ -192,7 +192,7 @@ def main_loop():
                 send_to_users(feed)
             else:
                 pass
-        else:
+        else: # no one in database
             pass
         time.sleep(sleep)
 
@@ -211,26 +211,26 @@ def message_handler(message):
     is_admin = get_is_admin(chat_id, user_id)
     new_chat_member_id = message.new_chat_members[0].id if message.new_chat_members else None
     start_msg = "\nهذا البوت مخصص لارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة.\nلتفعيل الاشتراك: /on\nاذا اردت الغاء الاشتراك : /off\n\n\nhttps://aosus.org"
-    text = message.text.replace(bot_username, '').lower() if message.text else None # replace bot username because commands like this
+    text = message.text.replace(bot_username, '').lower() if message.text else None # replace bot username because commands like this /on@bot_username
     if text: # Avoid error, 'NoneType' object has no attribute 'startswith'
         if text.startswith(('/on', '/off')):
             if is_private_chat:
                 convert_status(chat_id, msg_id, text[1:]) # [1:] mean remove the /
             else:
                 if is_admin:
-                    convert_status(chat_id, msg_id, text[1:]) # [1:] mean remove the /on@bot_username
+                    convert_status(chat_id, msg_id, text[1:]) # [1:] mean remove the /
                 else:
                     bot.reply_to(message, "يجب ان تكون ادمن لكي تقوم بهذا الامر")
-        elif text.startswith('/start') and is_private_chat:
+        elif text.startswith('/start') and is_private_chat: # start just work in private chat
             text = f"اهلا بك <a href='tg://user?id={user_id}'>{first_name}</a>"+start_msg.format(name=first_name, id=user_id)
             bot.reply_to(message, text, parse_mode="HTML")
-        elif text.startswith('/help'):
+        elif text.startswith('/help'): # help work in private and public chat
             text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n\nhttps://aosus.org"
             bot.reply_to(message, text)
         else:
             pass
     else:
-        if new_chat_member_id == bot_id:
+        if new_chat_member_id == bot_id: # if new member is the bot
             text = f"شكرا <a href='tg://user?id={user_id}'>{first_name}</a> لاضافتي الى المحادثة 🌹\n{start_msg.format(name=first_name, id=user_id)}"
             bot.send_message(chat_id, text, parse_mode="HTML")
 
