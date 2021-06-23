@@ -211,7 +211,7 @@ def message_handler(message):
     is_admin = get_is_admin(chat_id, user_id)
     new_chat_member_id = message.new_chat_members[0].id if message.new_chat_members else None
     start_msg = "اهلا بك <a href='tg://user?id={id}'>{name}</a>\nهذا البوت مخصص لارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة.\nلتفعيل الاشتراك: /on\nاذا اردت الغاء الاشتراك : /off\n\n\nhttps://aosus.org"
-    text = message.text.replace(bot_username, '') if message.text else None # replace bot username because commands like this
+    text = message.text.replace(bot_username, '').lower() if message.text else None # replace bot username because commands like this
     if text: # Avoid error, 'NoneType' object has no attribute 'startswith'
         if text.startswith(('/on', '/off')):
             if is_private_chat:
