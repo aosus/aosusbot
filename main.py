@@ -210,7 +210,7 @@ def message_handler(message):
     is_private_chat = message.chat.type == "private"
     is_admin = get_is_admin(chat_id, user_id)
     new_chat_member_id = message.new_chat_members[0].id if message.new_chat_members else None
-    start_msg = "اهلا بك <a href='tg://user?id={id}'>{name}</a>\nهذا البوت مخصص لارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة.\nلتفعيل الاشتراك: /on\nاذا اردت الغاء الاشتراك : /off\n\n\nhttps://aosus.org"
+    start_msg = "\nهذا البوت مخصص لارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة.\nلتفعيل الاشتراك: /on\nاذا اردت الغاء الاشتراك : /off\n\n\nhttps://aosus.org"
     text = message.text.replace(bot_username, '').lower() if message.text else None # replace bot username because commands like this
     if text: # Avoid error, 'NoneType' object has no attribute 'startswith'
         if text.startswith(('/on', '/off')):
@@ -222,7 +222,7 @@ def message_handler(message):
                 else:
                     bot.reply_to(message, "يجب ان تكون ادمن لكي تقوم بهذا الامر")
         elif text.startswith('/start') and is_private_chat:
-            text = start_msg.format(name=first_name, id=user_id)
+            text = "اهلا بك <a href='tg://user?id={id}'>{name}</a>"+start_msg.format(name=first_name, id=user_id)
             bot.reply_to(message, text, parse_mode="HTML")
         elif text.startswith('/help'):
             text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n\nhttps://aosus.org"
