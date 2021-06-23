@@ -167,13 +167,13 @@ def get_last_text():
     summary = cleanhtml( feed['summary'])
     summary = summary[:summary.find(' ', 55)]+'...' # get full last word
     link = feed['link']
-    text = f"موضوع جديد على مجتمع اسس من {author} \n\n <b><a href='{link}'>{title}</a></b> \n\n <code>{summary}</code> \n\nالقسم:{tag}"
+    text = f"من {author} \n\n <b><a href='{link}'>{title}</a></b> \n\n <code>{summary}</code> \n\nالقسم:{tag}"
     return text
 
 def send_to_users():
     """ send to user the news
     """
-    text = get_last_text()
+    text = "موضوع جديد على مجتمع اسس"+get_last_text()
     for chat_id in get_column('chats', 'id'):
         try:
             bot.send_message(chat_id, text, parse_mode="HTML")
