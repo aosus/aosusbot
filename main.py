@@ -226,7 +226,10 @@ def message_handler(message):
             text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n\nhttps://aosus.org"
             bot.reply_to(message, text)
         elif text.startswith('/last_topic'): # last_topic work in private and public chat
-            bot.reply_to(message, get_last_text(), parse_mode="HTML")
+            if is_admin:
+                bot.reply_to(message, get_last_text(), parse_mode="HTML")
+            else:
+                bot.reply_to(message, "يجب ان تكون ادمن لكي تقوم بهذا الامر")
         else:
             pass
     else:
