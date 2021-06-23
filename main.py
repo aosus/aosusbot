@@ -225,6 +225,8 @@ def message_handler(message):
         elif text.startswith('/help'): # help work in private and public chat
             text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n\nhttps://aosus.org"
             bot.reply_to(message, text)
+        elif text.startswith('/last_topic'): # last_topic work in private and public chat
+            bot.reply_to(message, get_last_text(), parse_mode="HTML")
         else:
             pass
     else:
