@@ -224,7 +224,7 @@ def message_handler(message):
             text = start_msg.format(name=first_name, id=user_id)
             bot.reply_to(message, text, parse_mode="HTML")
         elif text.startswith('/help'):
-            text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك في خدمة البوت ارسل: /on\nولالغاء الاشتراك ارسل: /off"
+            text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n\nhttps://aosus.org"
             bot.reply_to(message, text)
         else:
             pass
