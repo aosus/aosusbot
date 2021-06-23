@@ -117,7 +117,7 @@ def get_is_admin(chat_id:int, user_id:int):
         bool: user id admin in chat_id
     """
     if chat_id == user_id: # if is chat_id == user_id that mean is private
-        return False
+        return True # return True because you are admin in your chat, I did it for last_topic command
     else:
         return user_id in map(lambda user: user.user.id, bot.get_chat_administrators(chat_id)) # map make list of admins id
 
