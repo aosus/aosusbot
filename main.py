@@ -154,12 +154,13 @@ def cleanhtml(raw_html:str):
     cleantext = re.sub(cleanr, '', raw_html)
     return cleantext
 
-def get_text(feed):
+def get_last_text():
     """ Return text of news
 
     Args:
         feed ('feedparser.util.FeedParserDict'): rss
     """
+    feed = get_latest_news()
     title = feed['title']
     author = feed['author']
     tag = feed['tags'][0]['term']
@@ -169,13 +170,10 @@ def get_text(feed):
     text = f"موضوع جديد على مجتمع اسس من {author} \n\n <b><a href='{link}'>{title}</a></b> \n\n <code>{summary}</code> \n\nالقسم:{tag}"
     return text
 
-def send_to_users(feed):
+def send_to_users():
     """ send to user the news
-
-    Args:
-        feed ('feedparser.util.FeedParserDict'): rss
     """
-    text = get_text(feed)
+    text = get_last_text()
     for chat_id in get_column('chats', 'id'):
         try:
             bot.send_message(chat_id, text, parse_mode="HTML")
@@ -189,7 +187,7 @@ def main_loop():
             feed = get_latest_news()
             if feed.id != get_last_id():
                 add_id(feed.id)
-                send_to_users(feed)
+                send_to_users()
             else:
                 pass
         else: # no one in database
