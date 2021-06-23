@@ -135,10 +135,10 @@ def convert_status(chat_id:int, msg_id:int, new_status:str):
                             reply_to_message_id=msg_id)
     else:
         if new_status == 'on':
-            bot.send_message(chat_id, "تم تفعيل الخدمة", reply_to_message_id=msg_id)
+            bot.send_message(chat_id, "تم تفعيل الاشتراك", reply_to_message_id=msg_id)
             insert('chats', (chat_id,))
         else:
-            bot.send_message(chat_id, "تم الغاء تفعيل الخدمة", reply_to_message_id=msg_id)
+            bot.send_message(chat_id, "تم الغاء تفعيل الاشتراك", reply_to_message_id=msg_id)
             del_row('chats', 'id', str(chat_id))
 
 def cleanhtml(raw_html:str):
