@@ -222,7 +222,7 @@ def message_handler(message):
                 else:
                     bot.reply_to(message, "يجب ان تكون ادمن لكي تقوم بهذا الامر")
         elif text.startswith('/start') and is_private_chat:
-            text = "اهلا بك <a href='tg://user?id={id}'>{name}</a>"+start_msg.format(name=first_name, id=user_id)
+            text = f"اهلا بك <a href='tg://user?id={user_id}'>{first_name}</a>"+start_msg.format(name=first_name, id=user_id)
             bot.reply_to(message, text, parse_mode="HTML")
         elif text.startswith('/help'):
             text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n\nhttps://aosus.org"
