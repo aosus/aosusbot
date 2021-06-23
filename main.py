@@ -163,7 +163,8 @@ def get_text(feed):
     title = feed['title']
     author = feed['author']
     tag = feed['tags'][0]['term']
-    summary = cleanhtml( feed['summary'][:55])+'...'
+    summary = cleanhtml( feed['summary'])
+    summary = summary[:summary.find(' ', 55)]+'...'
     link = feed['link']
     text = f"موضوع جديد على مجتمع اسس من {author} \n\n <b><a href='{link}'>{title}</a></b> \n\n <code>{summary}</code> \n\nالقسم:{tag}"
     return text
