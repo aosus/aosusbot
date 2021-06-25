@@ -173,7 +173,7 @@ def get_last_text():
 def send_to_users():
     """ send to user the news
     """
-    text = "موضوع جديد على مجتمع اسس"+get_last_text()
+    text = "موضوع جديد على مجتمع اسس "+get_last_text()
     for chat_id in get_column('chats', 'id'):
         try:
             bot.send_message(chat_id, text, parse_mode="HTML")
