@@ -155,10 +155,10 @@ def cleanhtml(raw_html:str):
     return cleantext
 
 def get_last_text():
-    """ Return text of news
-
-    Args:
-        feed ('feedparser.util.FeedParserDict'): rss
+    """ Returns text of last topic
+    
+    Returns:
+        str: text of last topic
     """
     feed = get_latest_news()
     title = feed['title']
