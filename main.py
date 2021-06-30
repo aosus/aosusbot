@@ -164,8 +164,14 @@ def get_last_text():
     title = feed['title']
     author = feed['author']
     tag = feed['tags'][0]['term']
-    summary = cleanhtml( feed['summary'])
-    summary = summary[:summary.find(' ', 55)]+'...' # get full last word
+    summary = cleanhtml( feed['summary']).strip()
+    split_summary = summary.split()
+    # Remove the name of the pictures that are like this: picture_name@4x5444×3062 64.6 KB
+    if '@' and '×' in split_summary[0]:
+        summary = ' '.join(split_summary[3:])
+    else:
+        pass
+    summary = summary[:summary.strip('\n').find(' ', 55)]+'...' # get full last word
     link = feed['link']
     text = f"من {author} \n\n <b><a href='{link}'>{title}</a></b> \n\n <code>{summary}</code> \n\nالقسم:{tag}"
     return text
