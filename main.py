@@ -167,7 +167,7 @@ def get_last_text():
     summary = cleanhtml( feed['summary']).strip()
     split_summary = summary.split()
     # Remove the name of the pictures that are like this: picture_name@4x5444×3062 64.6 KB
-    if '@' and '×' in split_summary[0]:
+    if '@' in split_summary[0] and '×' in split_summary[0]:
         summary = ' '.join(split_summary[3:])
     else:
         pass
