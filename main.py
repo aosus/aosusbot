@@ -15,7 +15,7 @@ url = "https://aosus.org/latest.rss"
 sleep = 15
 
 
-# Check for the existence of the database
+# التحقق من وجود قاعدة البيانات
 if os.path.lexists("./db.sqlite3"):
     coon = sqlite3.connect('./db.sqlite3', check_same_thread=False)
     cursor = coon.cursor()
@@ -30,11 +30,10 @@ else:
         pass
 
 def insert(table_name:str, args_:tuple):
-    """ Insert values into database
-
-    Args:
-        table_name (str): name of table you want insert to
-        args_ (tuple): args of column
+    """ ادخال البيانات داخل قاعدة البيانات
+    المتغيرات:
+        table_name (str): اسم الجدول المراد ادخال البيانات فيه
+        args_ (tuple): القيم التي سوف تملي بها الاعمدة الخاصة بالجدول
     """
     try:
         lock.acquire(True)
@@ -46,14 +45,12 @@ def insert(table_name:str, args_:tuple):
         lock.release()
 
 def get_column(table_name:str, column:str):
-    """ Return all values in column
-
-    Args:
-        table_name (str): name of table you want get column from
-        column (str): column name you want fetch
-
-    Returns:
-        list: list of values
+    """ ترجع لك جميع القيم التي في العامود المعطى
+    المتغيرات:
+        table_name (str): اسم الجدول اذي يوجد فيه العامود
+        column (str): اسم العامود الذي تريد اسخراج جميع القيم التي به
+    المخرجات:
+        list: قائمة من عناصر العامود
     """
     try:
         lock.acquire(True)
@@ -64,12 +61,11 @@ def get_column(table_name:str, column:str):
 
 
 def del_row(table_name:str, column:str, value:str):
-    """ Delete row from database
-
-    Args:
-        table_name (str): name of table you want delete from
-        column (str): Column containing the value whose row you want to delete
-        value (str): value whose row you want to delete
+    """ حذف صف من قاعدة البيانات
+    المتغيرات:
+        table_name (str): اسم الجدول الذي يوجد به العامود
+        column (str): اسم العامود الذي يوجد به الصف
+        value (str): القيمة التي تريد مسحها الموجودة في العامود
     """
     try:
         lock.acquire(True)
@@ -79,55 +75,58 @@ def del_row(table_name:str, column:str, value:str):
         lock.release()
 
 def get_latest_news():
-    """ Return latest news from https://aosus.org/latest
-        use rss
+    """ https://aosus.org/latest ارجاع اخر موضوع من 
 
-    Returns:
-        dict: Details of the latest news
+    المخرجات:
+        dict: تفاصيل اخر موضوع
     """
     return feedparser.parse(url).entries[0]
 
 def get_last_id():
-    """ Return id from './last_id.txt'
+    """ ارجاع ايدي اخر موضوع تم ارساله
 
-    Returns:
-        str: id of latest news
+    المخرجات:
+        str: ايدي اخر موضوع تم ارساله
     """
     with open('./last_id.txt','r') as f:
         last_id = f.read()
         return last_id
 
 def add_id(news_id:str):
-    """ write news_id in './last_id.txt'
+    """ './last_id.txt' اضافة ايدي اخر منشور هنا
 
-    Args:
-        news_id (str): id of news
+    المتغيرات:
+        news_id (str): ايدي الموضوع الجديد
     """
     with open('./last_id.txt', 'w') as f:
         f.write(news_id)
 
 def get_is_admin(chat_id:int, user_id:int):
-    """ return if the user_id admin in chat_id
+    """ ارجاع اذا كان الشخص ادمن في المحادثة
 
-    Args:
-        chat_id (int): chat_id
-        user_id (int): user_id
+    المتغيرات:
+        chat_id (int): ايدي الرسالة
+        user_id (int): ايدي الشخص
 
-    Returns:
+    المخرجات:
         bool: user id admin in chat_id
     """
-    if chat_id == user_id: # if is chat_id == user_id that mean is private
-        return True # return True because you are admin in your chat, I did it for last_topic command
+    # اذا كان ايدي المحادثة هو ايدي الشخص
+    # هذا يعني ان المحادثة خاصة
+    if chat_id == user_id:
+        # ارجاع صحيح لان الشخص ادمن في محادثته
+        return True
     else:
-        return user_id in map(lambda user: user.user.id, bot.get_chat_administrators(chat_id)) # map make list of admins id
+        # وظيفة الماب هي ارجاع ايديات مشرفين المحادثة
+        return user_id in map(lambda user: user.user.id, bot.get_chat_administrators(chat_id))
 
-def convert_status(chat_id:int, msg_id:int, new_status:str):
-    """ convert the status of chat
+def convert_status(chat_id:int, new_status:str, msg_id:int = None):
+    """ حذف او اضافة العضو الى قاعدة البيانات
 
-    Args:
-        chat_id (int): chat id
-        msg_id (int): message id
-        new_status (str): new chat status
+    المتغيرات:
+        chat_id (int): ايدي الشخص المراد حذفه او اضافته
+        new_status (str): الحالة الجديدة (on, off)
+        msg_id (int, optional): ايدي الرسالة للرد عليها. Defaults to None.
     """
     status = 'on' if str(chat_id) in get_column('chats', 'id') else 'off'
     if status == new_status:
@@ -142,23 +141,23 @@ def convert_status(chat_id:int, msg_id:int, new_status:str):
             del_row('chats', 'id', str(chat_id))
 
 def cleanhtml(raw_html:str):
-    """ clean html raw form tags
+    """ html تنظيف النص من تاقات ال
 
-    Args:
-        raw_html (str): html raw
+    المتغيرات:
+        raw_html (str): html نص ال
 
     Returns:
-        str: clean text
+        str: html نص نظيف لايحتوي على تاقات ال
     """
     cleanr = re.compile('<.*?>')
     cleantext = re.sub(cleanr, '', raw_html)
     return cleantext
 
 def get_last_text():
-    """ Returns text of last topic
+    """ ارجاع نص اخر موضوع
     
-    Returns:
-        str: text of last topic
+    المخرجات:
+        str: نص اخر موضوع
     """
     feed = get_latest_news()
     title = feed['title']
@@ -177,18 +176,24 @@ def get_last_text():
     return text
 
 def send_to_users():
-    """ send to user the news
+    """
+    ارسال الموضوع الى مستخدمين البوت
     """
     text = "موضوع جديد على مجتمع اسس "+get_last_text()
     for chat_id in get_column('chats', 'id'):
         try:
             bot.send_message(chat_id, text, parse_mode="HTML")
-        except Exception: # handle when someone kicked bot
-            pass
+        # في حالة طرد او اغلاق البوت يتم ازالة العضو من قاعدة البيانات
+        except Exception:
+            convert_status(chat_id, new_status='off')
 
 def main_loop():
-    """Fetch latest news and sends to users"""
+    """
+    يتم عمل حلقة لانهائية هنا واذ تم العثور على ايدي
+    موضوع جديد يتم نشره
+    """
     while True:
+        # التحقق من وجود اعضاء في قاعدة البيانات
         if len(get_column('chats', 'id')) != 0:
             feed = get_latest_news()
             if feed.id != get_last_id():
@@ -196,17 +201,15 @@ def main_loop():
                 send_to_users()
             else:
                 pass
-        else: # no one in database
+        else:
             pass
         time.sleep(sleep)
 
-@bot.edited_message_handler(func= lambda msg: True)
+@bot.edited_message_handler(func= lambda msg: msg.text)
 @bot.message_handler(content_types=["new_chat_members"])
-@bot.message_handler(func=lambda msg: True)
-@bot.message_handler(func=lambda msg: True, commands=['start', 'help', 'on', 'off'])
+@bot.message_handler(func=lambda msg: msg.text)
+@bot.message_handler(commands=['start', 'help', 'on', 'off'])
 def message_handler(message):
-    """ just get chat id
-    """
     chat_id = message.chat.id
     user_id = message.from_user.id
     first_name = message.from_user.first_name
@@ -215,23 +218,29 @@ def message_handler(message):
     is_admin = get_is_admin(chat_id, user_id)
     new_chat_member_id = message.new_chat_members[0].id if message.new_chat_members else None
     start_msg = "\nهذا البوت مخصص لارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة.\nلتفعيل الاشتراك: /on\nاذا اردت الغاء الاشتراك : /off\n\n\nhttps://aosus.org"
-    text = message.text.replace(bot_username, '').lower() if message.text else None # replace bot username because commands like this /on@bot_username
-    if text: # Avoid error, 'NoneType' object has no attribute 'startswith'
+    if not new_chat_member_id:
+        # ازالة معرف البوت من الامر ان وجد
+        text = message.text.replace(bot_username, '').lower()
         if text.startswith(('/on', '/off')):
             if is_private_chat:
-                convert_status(chat_id, msg_id, text[1:]) # [1:] mean remove the /
+                # [1:] تعني ازالة الخط المائل او سلاش او علامة القسمة
+                convert_status(chat_id, new_status=text[1:], msg_id=msg_id)
             else:
                 if is_admin:
-                    convert_status(chat_id, msg_id, text[1:]) # [1:] mean remove the /
+                    # [1:] تعني ازالة الخط المائل او سلاش او علامة القسمة
+                    convert_status(chat_id, new_status=text[1:], msg_id=msg_id)
                 else:
                     bot.reply_to(message, "يجب ان تكون ادمن لكي تقوم بهذا الامر")
-        elif text.startswith('/start') and is_private_chat: # start just work in private chat
+        # امر البداية يعمل في المحادثات الخاصة فقط
+        elif text.startswith('/start') and is_private_chat:
             text = f"اهلا بك <a href='tg://user?id={user_id}'>{first_name}</a>"+start_msg.format(name=first_name, id=user_id)
             bot.reply_to(message, text, parse_mode="HTML")
-        elif text.startswith('/help'): # help work in private and public chat
+        #امر المساعدة يعمل في المحادثة العامة والخاصة
+        elif text.startswith('/help'):
             text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n\nhttps://aosus.org"
             bot.reply_to(message, text)
-        elif text.startswith('/last_topic'): # last_topic work in private and public chat
+        #امر اخر موضوع يعمل في المحادثة العامة والخاصة
+        elif text.startswith('/last_topic'):
             if is_admin:
                 bot.reply_to(message, get_last_text(), parse_mode="HTML")
             else:
@@ -239,11 +248,14 @@ def message_handler(message):
         else:
             pass
     else:
-        if new_chat_member_id == bot_id: # if new member is the bot
+        # اذا كان اخر عضو هو البوت
+        if new_chat_member_id == bot_id:
             text = f"شكرا <a href='tg://user?id={user_id}'>{first_name}</a> لاضافتي الى المحادثة 🌹\n{start_msg.format(name=first_name, id=user_id)}"
             bot.send_message(chat_id, text, parse_mode="HTML")
+        else:
+            pass
 
-# Run bot
+# تشغيل البوت
 threading.Thread(target=main_loop).start()
 while True:
     print(f"Start {bot.get_me().first_name}")
