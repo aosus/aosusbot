@@ -5,7 +5,7 @@ import threading
 import feedparser
 import sqlite3
 import time
-from config import TOKEN
+from config import TOKEN, super_users
 from make_db import tablesName
 
 bot = telebot.TeleBot(TOKEN)
@@ -216,6 +216,7 @@ def message_handler(message):
     msg_id = message.id
     is_private_chat = message.chat.type == "private"
     is_admin = get_is_admin(chat_id, user_id)
+    is_superuser = chat_id in super_users
     new_chat_member_id = message.new_chat_members[0].id if message.new_chat_members else None
     start_msg = "\nهذا البوت مخصص لارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة.\nلتفعيل الاشتراك: /on\nاذا اردت الغاء الاشتراك : /off\n\n\nhttps://aosus.org"
     if not new_chat_member_id:
@@ -237,7 +238,11 @@ def message_handler(message):
             bot.reply_to(message, text, parse_mode="HTML")
         #امر المساعدة يعمل في المحادثة العامة والخاصة
         elif text.startswith('/help'):
-            text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n\nhttps://aosus.org"
+            text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n"
+            if is_superuser:
+                text = text+"لاضافة رد\nيمكنك عمل ربلي على الرسالة بـ 'اضافة رد <اسم الرد>'\nمثال: اضافة رد تجربة\nلاضافة بدون ربلي 'اضافة رد <الرد> <محتوى الرد>'\nمثال: اضافة رد تجربة هذا الرد للتجربة"
+            else:
+                text = text+"https://aosus.org"
             bot.reply_to(message, text)
         #امر اخر موضوع يعمل في المحادثة العامة والخاصة
         elif text.startswith('/last_topic'):
