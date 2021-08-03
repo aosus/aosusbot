@@ -3,26 +3,25 @@ from config import TOKEN
 
 # Set names for tables and their respective columns
 tablesName = {
-        'chats':['id']
+        'chats':['id'],
+            'replies': ['key', 'value'],
             }
-def main():
+def make():
     """
-    Create database
+    دالة انشاء قاعدة البيانات
     """
+    # التحقق من انه تم وضع التوكن الخاص بالبوت ام لا
     if TOKEN == "":
-        return False
+        raise Exception("config يجب عليك وضع التوكن الخاص بالبوت في ملف")
     else:
         coon = sqlite3.connect('db.sqlite3')
         cursor = coon.cursor()
-        for table, columns in tablesName.items():
+        for table in tablesName:
             cursor.execute(f"""CREATE TABLE IF NOT EXISTS '{table}'(
-                            {columns[0]}
+                                {','.join(tablesName.get(table))}
                             )""")
             coon.commit()
-    return True
 
 if __name__ == '__main__':
-    if main():
-        print("Database created successfully.")
-    else:
-        print("You must fill the variables in 'config.py'")
+    make()
+    print("Database created successfully.")
