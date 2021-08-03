@@ -175,6 +175,15 @@ def get_last_text():
     text = f"من {author} \n\n <b><a href='{link}'>{title}</a></b> \n\n <code>{summary}</code> \n\nالقسم:{tag}"
     return text
 
+def add_replies(key:str, value:str):
+    """ اضافة رد الى قاعدة البيانات 
+
+    Args:
+        key (str): الامر لاستدعاء الرد
+        value (str): الرد
+    """
+    insert('replies', (key, value))
+
 def send_to_users():
     """
     ارسال الموضوع الى مستخدمين البوت
@@ -216,12 +225,27 @@ def message_handler(message):
     msg_id = message.id
     is_private_chat = message.chat.type == "private"
     is_admin = get_is_admin(chat_id, user_id)
-    is_superuser = chat_id in super_users
+    is_superuser = user_id in super_users
+    reply_text = message.reply_to_message.html_text if message.reply_to_message else None
     new_chat_member_id = message.new_chat_members[0].id if message.new_chat_members else None
     start_msg = "\nهذا البوت مخصص لارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة.\nلتفعيل الاشتراك: /on\nاذا اردت الغاء الاشتراك : /off\n\n\nhttps://aosus.org"
+    add_replies_help = "لاضافة رد\nيمكنك عمل ربلي على الرسالة بـ 'اضافة رد-<اسم الرد>'\nمثال: اضافة رد-تجربة\nلاضافة بدون ربلي 'اضافة رد-<الرد>-<محتوى الرد>'\nمثال: اضافة رد-تجربة-هذا الرد للتجربة"
     if not new_chat_member_id:
         # ازالة معرف البوت من الامر ان وجد
         text = message.text.replace(bot_username, '').lower()
+        # النص مقسم
+        s_text = text.split('-')
+        replies_error = lambda: bot.reply_to(message, "يوجد مشكلة في الامر، الطريقة الصحيحة "+add_replies_help)
+        if text.startswith('اضافة رد') and is_superuser:
+            if len(s_text) == 2:
+                if reply_text:
+                    add_replies(s_text[1], reply_text)
+                else:
+                    bot.reply_to(message, "يجب عمل ربلي على رسالة \nللتفاصيل:\n/help")
+            elif len(s_text) == 3:
+                add_replies(s_text[1], s_text[2])
+            else:
+                replies_error()
         if text.startswith(('/on', '/off')):
             if is_private_chat:
                 # [1:] تعني ازالة الخط المائل او سلاش او علامة القسمة
@@ -240,7 +264,7 @@ def message_handler(message):
         elif text.startswith('/help'):
             text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n"
             if is_superuser:
-                text = text+"لاضافة رد\nيمكنك عمل ربلي على الرسالة بـ 'اضافة رد <اسم الرد>'\nمثال: اضافة رد تجربة\nلاضافة بدون ربلي 'اضافة رد <الرد> <محتوى الرد>'\nمثال: اضافة رد تجربة هذا الرد للتجربة"
+                text = text+add_replies_help
             else:
                 text = text+"https://aosus.org"
             bot.reply_to(message, text)
