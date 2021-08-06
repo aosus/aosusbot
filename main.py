@@ -74,6 +74,59 @@ def del_row(table_name:str, column:str, value:str):
     finally:
         lock.release()
 
+def update(table_name:str, column:str, new_value:str, where_column:str, where_value:str) -> None:
+    """ تعديل صف في قاعدة البيانات
+    المتغيرات:
+        table_name (str): اسم الجدول.
+        column (str): العمود الذي تريد تحديثه.
+        new_value (str): القيمة الجديدة.
+        where_column (str): where_value العمود الذي يوجد به.
+        where_value (str): where_column القيمة الموجودة في.
+    """
+    try:
+        lock.acquire(True)
+        cursor.execute(f"UPDATE {table_name} SET '{column}'= '{new_value}' WHERE {where_column} = '{where_value}'")
+        coon.commit()
+    finally:
+        lock.release()
+
+def row(table_name:str, column:str, word:str, want='*', lst=True):
+    """ جلب صف من قاعدة البيانات
+    المتغيرات:
+        table_name (str): اسم الجدول الذي يوجد به العمود
+        column (str): اسم العمود اذي يوجد به الصف
+        word (str): القيمة الموجود في العمود
+        want (str, optional): word العمود الذي تريده من الصف الذي يوجد به العمود الي قيمته. Defaults to '*'.
+        lst (bool, optional): اخراج المعطيات كلستة ام تيبل. Defaults to 'True'.
+    المخرجات:
+        [list,tuple,str,None]: قائمة بالنتائج او عنصر او لاشي اذ لم تكن هناك نتائج
+    """
+    try:
+        lock.acquire(True)
+        cursor.execute(f"SELECT {want} FROM {table_name} WHERE {column}='{word}'")
+        if lst:
+            result = list(map(
+                        lambda val: str(val).replace('<br>', '\n'),
+                            [val for t in cursor.fetchall() for val in t]
+                            ))
+        else:
+            result = list(map(
+                        lambda t: tuple(str(val) for val in t),
+                            [t for t in cursor.fetchall()]
+            ))
+        if lst:
+            if (len(result) == 0):
+                return None
+            elif (len(result) == 1):
+                return result[0] if lst else result[0][0]
+            else:
+                pass # سوف يتم تنفيد اخخر سطر وارجاع النتائج كلها
+        else:
+            pass # سوف يتم تنفيد اخخر سطر وارجاع النتائج كلها
+        return result
+    finally:
+        lock.release()
+
 def get_latest_news():
     """ https://aosus.org/latest ارجاع اخر موضوع من 
 
@@ -165,12 +218,13 @@ def get_last_text():
     tag = feed['tags'][0]['term']
     summary = cleanhtml( feed['summary']).strip()
     split_summary = summary.split()
-    # Remove the name of the pictures that are like this: picture_name@4x5444×3062 64.6 KB
+    # picture_name@4x5444×3062 64.6 KB مسح اسم الصور مثل هذا
     if '@' in split_summary[0] and '×' in split_summary[0]:
         summary = ' '.join(split_summary[3:])
     else:
         pass
-    summary = summary[:summary.strip('\n').find(' ', 55)]+'...' # get full last word
+    # جلب اخر كلمة كاملة
+    summary = summary[:summary.strip('\n').find(' ', 55)]+'...'
     link = feed['link']
     text = f"من {author} \n\n <b><a href='{link}'>{title}</a></b> \n\n <code>{summary}</code> \n\nالقسم:{tag}"
     return text
@@ -178,11 +232,76 @@ def get_last_text():
 def add_replies(key:str, value:str):
     """ اضافة رد الى قاعدة البيانات 
 
-    Args:
+    المتغيرات:
         key (str): الامر لاستدعاء الرد
         value (str): الرد
     """
-    insert('replies', (key, value))
+    insert('replies', (str(key).replace('\n', '<br>'), 
+                        str(value).replace('\n', '<br>')))
+
+def del_replies(word: str):
+    """ مسح رد من قاعدة البيانات
+
+    المتغيرات:
+        word (str): الكلمة الذي تشير الى الرد
+    """
+    del_row("replies", "key", word)
+
+def update_replies(word: str, new_val: str):
+    """ تعديل على محتوى الرد
+
+    المتغيرات:
+        word (str): الكلمة التي تشير الى الرد المراد تعديله
+        new_val (str): القيمة الجديدة للرد
+    """
+    update("replies", 'value', str(new_val).replace('\n', '<br>'), 'key', word)
+
+def get_replies(word: str = None):
+    """ جلب الرد من قاعدة البيانات
+
+    المتغيرات:
+        word (str): الكلمة التي تشير الى الرد
+    """
+    if word:
+        return str(row("replies", 'key', word, 'value')).replace('<br>', '\n')
+    else:
+        return get_column("replies", 'key')
+
+def replie(word: str, status: str, rep: str = None):
+    """ دالة لادارة جدول الردور
+
+    المتغيرات:
+        word (str): الكلمة التي تشير الى الرد
+        status (str): الحالة ["add", "del", "update"] or 1, 2, 3
+        rep (str, optional): الرد الخاص بالكلمة. Defaults to None.
+
+    Raises:
+        ValueError: قيمة خاطئة للحالة
+    """
+    status_cases = ["add", "del", "update", 1, 2, 3]
+    find_word = any(map(lambda w: w == word,
+                            get_replies()))
+    if status in status_cases:
+        if status in ["add", 1]:
+            if find_word:
+                return False
+            else:
+                add_replies(word, rep)
+                return True
+        elif status in ["del", 2]:
+            if not find_word:
+                return False
+            else:
+                del_replies(word)
+                return True
+        else:
+            if not find_word:
+                return False
+            else:
+                update_replies(word, rep)
+                return True
+    else:
+        raise ValueError("Invalid value, status must be {}".format(' or '.join(status_cases)))
 
 def send_to_users():
     """
@@ -217,7 +336,6 @@ def main_loop():
 @bot.edited_message_handler(func= lambda msg: msg.text)
 @bot.message_handler(content_types=["new_chat_members"])
 @bot.message_handler(func=lambda msg: msg.text)
-@bot.message_handler(commands=['start', 'help', 'on', 'off'])
 def message_handler(message):
     chat_id = message.chat.id
     user_id = message.from_user.id
@@ -235,17 +353,26 @@ def message_handler(message):
         text = message.text.replace(bot_username, '').lower()
         # النص مقسم
         s_text = text.split('-')
-        replies_error = lambda: bot.reply_to(message, "يوجد مشكلة في الامر، الطريقة الصحيحة "+add_replies_help)
-        if text.startswith('اضافة رد') and is_superuser:
-            if len(s_text) == 2:
-                if reply_text:
-                    add_replies(s_text[1], reply_text)
+        if s_text[0].strip() in ['اضافة رد', 'تعديل رد', 'مسح رد'] and is_superuser:
+            status = ['اضافة رد', 'مسح رد', 'تعديل رد'].index(s_text[0].strip()) + 1
+            if len(s_text) >= 2:
+                if len(s_text) == 2 and not reply_text and status != 2: # او مسح رد
+                    bot.reply_to(message, "يوجد خطأ لمعرفة طريقة الاستخدام ارسل \n /help")
                 else:
-                    bot.reply_to(message, "يجب عمل ربلي على رسالة \nللتفاصيل:\n/help")
-            elif len(s_text) == 3:
-                add_replies(s_text[1], s_text[2])
+                    word = s_text[1].strip()
+                    rep = s_text[2].strip() if len(s_text) >= 3 else reply_text if reply_text else None
+                    done = replie(word, status, rep)
+                    if done:
+                        bot.reply_to(message, "تم {} الرد بنجاج".format(
+                            s_text[0].split()[0]
+                        ))
+                    else:
+                        bot.reply_to(message, "هناك مشكلة، لايمكن {} {} {}".format(
+                                s_text[0].split()[0], word,
+                                    "موجود بالفعل" if status == 1 else "ليس موجود",
+                                    ))
             else:
-                replies_error()
+                bot.reply_to(message, "يوجد خطأ لمعرفة طريقة الاستخدام ارسل \n /help")
         if text.startswith(('/on', '/off')):
             if is_private_chat:
                 # [1:] تعني ازالة الخط المائل او سلاش او علامة القسمة
@@ -275,7 +402,15 @@ def message_handler(message):
             else:
                 bot.reply_to(message, "يجب ان تكون ادمن لكي تقوم بهذا الامر")
         else:
-            pass
+            if text == 'الردود':
+                if len(get_replies()) != 0:
+                    text = telebot.util.smart_split('\n'.join(get_replies()), 3000)
+                    for t in text:
+                        bot.reply_to(message,t)
+                else:
+                    bot.reply_to(message, "لايوجد ردود في البوت")
+            elif text in get_replies():
+                bot.reply_to(message, get_replies(text), parse_mode="HTML")
     else:
         # اذا كان اخر عضو هو البوت
         if new_chat_member_id == bot_id:
