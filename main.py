@@ -347,7 +347,7 @@ def message_handler(message):
     reply_text = message.reply_to_message.html_text if message.reply_to_message else None
     new_chat_member_id = message.new_chat_members[0].id if message.new_chat_members else None
     start_msg = "\nهذا البوت مخصص لارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة.\nلتفعيل الاشتراك: /on\nاذا اردت الغاء الاشتراك : /off\n\n\nhttps://aosus.org"
-    add_replies_help = "لاضافة رد\nيمكنك عمل ربلي على الرسالة بـ 'اضافة رد-<اسم الرد>'\nمثال: اضافة رد-تجربة\nلاضافة بدون ربلي 'اضافة رد-<الرد>-<محتوى الرد>'\nمثال: اضافة رد-تجربة-هذا الرد للتجربة"
+    add_replies_help = "لاضافة او تعديل رد\nيمكنك عمل ربلي على الرسالة بـ 'اضافة/تعديل رد-<اسم الرد>'\nمثال: اضافة/تعديل رد-تجربة\nلاضافة بدون ربلي 'اضافة/تعديل رد-<الرد>-<محتوى الرد>'\nمثال: اضافة رد-تجربة-هذا الرد للتجربة\n للمسح: مسح رد <اسم الرد>"
     if not new_chat_member_id:
         # ازالة معرف البوت من الامر ان وجد
         text = message.text.replace(bot_username, '').lower()
@@ -389,7 +389,7 @@ def message_handler(message):
             bot.reply_to(message, text, parse_mode="HTML")
         #امر المساعدة يعمل في المحادثة العامة والخاصة
         elif text.startswith('/help'):
-            text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\n\n"
+            text = "اهلا بك في خدمة ارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة..\nللاشتراك ارسل: /on\nولالغاء الاشتراك ارسل: /off\nلرؤية الردود: الردود\n\n\n"
             if is_superuser:
                 text = text+add_replies_help
             else:
