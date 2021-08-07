@@ -236,8 +236,10 @@ def add_replies(key:str, value:str):
         key (str): الامر لاستدعاء الرد
         value (str): الرد
     """
-    insert('replies', (str(key).replace('\n', '<br>'), 
-                        str(value).replace('\n', '<br>')))
+    key = str(key).replace('\n', '<br>')
+    value = str(value).replace('\n', '<br>')
+    key = key if key.startswith('/') else '/'+key
+    insert('replies', (key, value))
 
 def del_replies(word: str):
     """ مسح رد من قاعدة البيانات
