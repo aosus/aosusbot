@@ -354,7 +354,7 @@ def message_handler(message):
         # ازالة معرف البوت من الامر ان وجد
         text = message.text.replace(bot_username, '').lower()
         # النص مقسم
-        s_text = text.split('-')
+        s_text = list(map(str.strip, text.strip('-').split('-')))
         if s_text[0].strip() in ['اضافة رد', 'تعديل رد', 'مسح رد'] and is_superuser:
             status = ['اضافة رد', 'مسح رد', 'تعديل رد'].index(s_text[0].strip()) + 1
             if len(s_text) >= 2:
