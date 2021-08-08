@@ -349,7 +349,7 @@ def message_handler(message):
     reply_text = message.reply_to_message.html_text if message.reply_to_message else None
     new_chat_member_id = message.new_chat_members[0].id if message.new_chat_members else None
     start_msg = "\nهذا البوت مخصص لارسال اخر المواضيع الخاصة بمجتمع اسس للبرامج الحرة والمفتوحة.\nلتفعيل الاشتراك: /on\nاذا اردت الغاء الاشتراك : /off\n\n\nhttps://aosus.org"
-    add_replies_help = "لاضافة او تعديل رد\nيمكنك عمل ربلي على الرسالة بـ 'اضافة/تعديل رد-<اسم الرد>'\nمثال: اضافة/تعديل رد-تجربة\nلاضافة بدون ربلي 'اضافة/تعديل رد-<الرد>-<محتوى الرد>'\nمثال: اضافة رد-تجربة-هذا الرد للتجربة\n للمسح: مسح رد <اسم الرد>"
+    add_replies_help = "لاضافة او تعديل رد\nيمكنك عمل رد على الرسالة بـ 'اضافة/تعديل رد-<اسم الرد>'\nمثال: اضافة/تعديل رد-تجربة\nلاضافة بدون رد 'اضافة/تعديل رد-<الرد>-<محتوى الرد>'\nمثال: اضافة رد-تجربة-هذا الرد للتجربة\n للمسح: مسح رد <اسم الرد>"
     if not new_chat_member_id:
         # ازالة معرف البوت من الامر ان وجد
         text = message.text.replace(bot_username, '').lower()
@@ -365,7 +365,7 @@ def message_handler(message):
                     rep = s_text[2].strip() if len(s_text) >= 3 else reply_text if reply_text else None
                     done = replie(word, status, rep)
                     if done:
-                        bot.reply_to(message, "تم {} الرد بنجاج".format(
+                        bot.reply_to(message, "تم {} الرد بنجاح".format(
                             s_text[0].split()[0]
                         ))
                     else:
